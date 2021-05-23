@@ -2,17 +2,24 @@ const { response } = require("express");
 const User = require("../models/user");
 const bcryptjs = require("bcryptjs");
 
-const usuariosGet = (req, res = response) => {
-  const params = req.query;
+const usuariosGet = async (req, res = response) => {
+  const { limit = 5, skip = 0 } = req.query;
+  const query = { status: true };
+
+  const [total, users] = await Promise.all([
+    User.countDocuments(query),
+    User.find(query).skip(Number(skip)).limit(Number(limit)),
+  ]);
+
   res.json({
-    query,
-    msg: "get API - controlador",
+    total,
+    users,
   });
 };
 
 const usuariosPut = async (req, res) => {
   const id = req.params.id;
-  const { password, google, mail, ...rest } = req.body;
+  const { _id, password, google, mail, ...rest } = req.body;
 
   //validar contra DB
   if (password) {
@@ -23,10 +30,7 @@ const usuariosPut = async (req, res) => {
 
   const user = await User.findByIdAndUpdate(id, rest);
 
-  res.json({
-    msg: "put API",
-    user,
-  });
+  res.json(user);
 };
 
 const usuariosPost = async (req, res = response) => {
@@ -46,11 +50,14 @@ const usuariosPost = async (req, res = response) => {
   });
 };
 
-const usuariosDelete = (req, res) => {
-  res.json({
-    ok: true,
-    msg: "delete API",
-  });
+const usuariosDelete = async (req, res) => {
+  const { id } = req.params;
+  //borrado permanente
+  //const user = await User.findByIdAndDelete(id);
+
+  const user = await User.findByIdAndUpdate(id, { status: false });
+
+  res.json(user);
 };
 
 const usuariosPatch = (req, res) => {

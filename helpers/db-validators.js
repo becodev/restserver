@@ -17,7 +17,16 @@ const emailExists = async (mail = "") => {
   }
 };
 
+const userExistsByID = async (id) => {
+  const userExistis = await User.findById(id);
+
+  if (!userExistis) {
+    throw new Error(`El ID ${id} no existe en la BD.`);
+  }
+};
+
 module.exports = {
   isRoleValid,
   emailExists,
+  userExistsByID,
 };

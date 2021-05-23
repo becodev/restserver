@@ -7,14 +7,27 @@ const {
   usuariosDelete,
   usuariosPatch,
 } = require("../controllers/user");
-const { isRoleValid, emailExists } = require("../helpers/db-validators");
+const {
+  isRoleValid,
+  emailExists,
+  userExistsByID,
+} = require("../helpers/db-validators");
 const { validateChanges } = require("../middlewares/validateChanges");
 
 const router = Router();
 
 router.get("/", usuariosGet);
 
-router.put("/:id", usuariosPut);
+router.put(
+  "/:id",
+  [
+    check("id", "No es un ID valido").isMongoId(),
+    check("id").custom(userExistsByID),
+    check("rol").custom(isRoleValid),
+    validateChanges,
+  ],
+  usuariosPut
+);
 
 router.post(
   "/",
@@ -31,7 +44,15 @@ router.post(
   usuariosPost
 );
 
-router.delete("/", usuariosDelete);
+router.delete(
+  "/:id",
+  [
+    check("id", "No es un ID valido").isMongoId(),
+    check("id").custom(userExistsByID),
+    validateChanges,
+  ],
+  usuariosDelete
+);
 
 router.patch("/", usuariosPatch);
 
