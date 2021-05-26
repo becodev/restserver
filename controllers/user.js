@@ -52,6 +52,8 @@ const usuariosPost = async (req, res = response) => {
 
 const usuariosDelete = async (req, res) => {
   const { id } = req.params;
+
+  const uid = req.uid;
   //borrado permanente
   //const user = await User.findByIdAndDelete(id);
 
