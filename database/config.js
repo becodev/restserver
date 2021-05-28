@@ -9,10 +9,10 @@ const dbConnection = async () => {
       useFindAndModify: false,
     });
 
-    console.log("Base de datos online");
+    console.log("DB is online!");
   } catch (error) {
     console.log(error);
-    throw new Error("Error en la base de datos.");
+    throw new Error("DB error.");
   }
 };
 
