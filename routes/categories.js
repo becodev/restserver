@@ -2,21 +2,30 @@ const { Router } = require("express");
 const { check } = require("express-validator");
 const { validateChanges } = require("../middlewares/validateChanges");
 const { validateJWT } = require("../middlewares/validate-jwt");
-const { createCategory } = require("../controllers/categories");
+const {
+  createCategory,
+  getCategories,
+  getCategory,
+} = require("../controllers/categories");
+const { categoryExist } = require("../helpers/db-validators");
 
 const router = Router();
 
 // {{url}}/api/categories
-
+//[ check('id').custom(existeCategoria)]
 //get all categories
-router.get("/", (req, res) => {
-  res.json("get");
-});
+router.get("/", getCategories);
 
 //get a category by id
-router.get("/:id", (req, res) => {
-  res.json("get");
-});
+router.get(
+  "/:id",
+  [
+    check("id", "Not valid mongo id").isMongoId(),
+    check("id").custom(categoryExist),
+    validateChanges,
+  ],
+  getCategory
+);
 
 //create a new category,  private.
 router.post(

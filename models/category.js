@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
 
-const Categorychema = Schema({
+const CategorySchema = Schema({
   name: {
     type: String,
     required: [true, "The name is required"],
@@ -18,4 +18,10 @@ const Categorychema = Schema({
   },
 });
 
-module.exports = model("Category", Categorychema);
+CategorySchema.methods.toJSON = function () {
+  const { __v, status, ...data } = this.toObject();
+
+  return data;
+};
+
+module.exports = model("Category", CategorySchema);
