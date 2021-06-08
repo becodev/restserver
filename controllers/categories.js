@@ -1,7 +1,7 @@
 const { response } = require("express");
 const { Category } = require("../models");
 
-//!obtenerCategorias - paginado - total - populate
+//obtenerCategorias - paginado - total - populate
 const getCategories = async (req, res = response) => {
   const { limit = 5, skip = 0 } = req.query;
   const query = { status: true };
@@ -20,7 +20,7 @@ const getCategories = async (req, res = response) => {
   });
 };
 
-//! obtenerCategoria - populate {}
+// obtenerCategoria - populate {}
 const getCategory = async (req, res = response) => {
   const { id } = req.params;
 
@@ -55,11 +55,30 @@ const createCategory = async (req, res = response) => {
   res.status(201).json(category);
 };
 
-//! actualizarCategoria
-const updateCategory = async (req, res = response) => {};
+// actualizarCategoria
+const updateCategory = async (req, res = response) => {
+  const { id } = req.params;
+  const { status, user, ...data } = req.body;
 
-//! borrarCategoria (estado false)
-const deleteCategory = async (req, res = response) => {};
+  data.name = data.name.toUpperCase();
+  data.user = req.user._id;
+
+  const category = await Category.findByIdAndUpdate(id, data, { new: true });
+
+  res.json(category);
+};
+
+// borrarCategoria (estado false)
+const deleteCategory = async (req, res = response) => {
+  const { id } = req.params;
+  const deletedCategory = await Category.findByIdAndUpdate(
+    id,
+    { status: false },
+    { new: true }
+  );
+
+  res.json(deletedCategory);
+};
 
 module.exports = {
   createCategory,

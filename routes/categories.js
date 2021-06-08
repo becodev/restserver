@@ -1,18 +1,21 @@
 const { Router } = require("express");
 const { check } = require("express-validator");
-const { validateChanges } = require("../middlewares/validateChanges");
-const { validateJWT } = require("../middlewares/validate-jwt");
+const {
+  validateJWT,
+  validateChanges,
+  isAdminRole,
+} = require("../middlewares/");
 const {
   createCategory,
   getCategories,
   getCategory,
+  updateCategory,
+  deleteCategory,
 } = require("../controllers/categories");
 const { categoryExist } = require("../helpers/db-validators");
 
 const router = Router();
 
-// {{url}}/api/categories
-//[ check('id').custom(existeCategoria)]
 //get all categories
 router.get("/", getCategories);
 
@@ -39,13 +42,28 @@ router.post(
 );
 
 //update category by id, private.
-router.put("/:id", (req, res) => {
-  res.json("put");
-});
+router.put(
+  "/:id",
+  [
+    validateJWT,
+    check("name", "Name is required."),
+    check("id").custom(categoryExist),
+    validateChanges,
+  ],
+  updateCategory
+);
 
 //delete a category by id , only ADMIN_ROLE
-router.delete("/:id", (req, res) => {
-  res.json("delete");
-});
+router.delete(
+  "/:id",
+  [
+    validateJWT,
+    isAdminRole,
+    check("id").custom(categoryExist),
+    check("id", "Not valid mongo ID"),
+    validateChanges,
+  ],
+  deleteCategory
+);
 
 module.exports = router;

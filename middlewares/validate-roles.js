@@ -7,9 +7,9 @@ const isAdminRole = (req = request, res = response, next) => {
     });
   }
 
-  const { rol, name } = req.user;
+  const { role, name } = req.user;
 
-  if (rol !== "ADMIN_ROLE") {
+  if (role !== "ADMIN_ROLE") {
     return res.status(401).json({
       msg: `${name} does not have Admin role. ${name} can not do this.`,
     });
