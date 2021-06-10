@@ -2,8 +2,9 @@ const { response } = require("express");
 const { isValidObjectId } = require("mongoose");
 const { User, Product, Category } = require("../models");
 
-const collectionsAllowed = ["users", "category", "products"];
+const collectionsAllowed = ["users", "categories", "products"];
 
+//! FIND USERS
 const findUsers = async (term = "", res = response) => {
   /**
    * Funcion para buscar usuarios en la DB,
@@ -36,6 +37,52 @@ const findUsers = async (term = "", res = response) => {
   });
 };
 
+//! FIND CATEGORIES
+const findCategories = async (term = "", res = response) => {
+  const isMongoID = isValidObjectId(term);
+
+  if (isMongoID) {
+    const category = await Category.findById(term);
+
+    return res.json({
+      results: category ? [category] : [],
+    });
+  }
+
+  const regex = new RegExp(term, "i");
+
+  const categories = await Category.find({ name: regex, status: true });
+
+  res.json({
+    total: categories.length,
+    results: categories,
+  });
+};
+
+//! FIND PRODUCTS
+const findProducts = async (term = "", res = response) => {
+  const isMongoID = isValidObjectId(term);
+
+  if (isMongoID) {
+    const product = await Product.findById(term);
+
+    return res.json({
+      results: product ? [product] : [],
+    });
+  }
+
+  const regex = new RegExp(term, "i");
+
+  const products = await Product.find({ name: regex, status: true })
+    .populate("category", "name")
+    .populate("user", "name");
+
+  res.json({
+    total: products.length,
+    results: products,
+  });
+};
+
 const search = (req, res = response) => {
   const { collection, term } = req.params;
 
@@ -49,9 +96,11 @@ const search = (req, res = response) => {
     case "users":
       findUsers(term, res);
       break;
-    case "category":
+    case "categories":
+      findCategories(term, res);
       break;
     case "products":
+      findProducts(term, res);
       break;
 
     default:
@@ -59,8 +108,6 @@ const search = (req, res = response) => {
         msg: `I forgot to do this search :(`,
       });
   }
-
-  // res.json({ collection, term });
 };
 
 module.exports = { search };
